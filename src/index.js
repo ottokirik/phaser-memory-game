@@ -5,7 +5,7 @@ const config = {
   type: Phaser.AUTO, // webgl или canvas
   width: 1280,
   height: 720,
-  scene: new GameScene(),
+  scene: new GameScene('Game'),
 };
 
 const game = new Phaser.Game(config);
