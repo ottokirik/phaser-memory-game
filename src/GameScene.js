@@ -7,6 +7,7 @@ export class GameScene extends Scene {
   cardIds = [1, 2, 3, 4, 5];
   rows = 2;
   cols = 5;
+  openedCard = null;
 
   constructor(name) {
     super(name);
@@ -38,6 +39,33 @@ export class GameScene extends Scene {
       this.cards.push(new Card(this, id, positions.pop()));
       this.cards.push(new Card(this, id, positions.pop()));
     });
+
+    this.input.on('gameobjectdown', this.onCardClicked, this);
+  }
+
+  onCardClicked(pointer, card) {
+    if (card.opened) {
+      return;
+    }
+
+    if (!this.openedCard) {
+      card.open();
+      this.openedCard = card;
+      return;
+    }
+
+    card.open();
+
+    const timeout = setTimeout(() => {
+      if (this.openedCard.id === card.id) {
+        this.openedCard = null;
+      } else {
+        this.openedCard.close();
+        card.close();
+        this.openedCard = null;
+      }
+      clearTimeout(timeout);
+    }, 500);
   }
 
   getCardPositions() {
