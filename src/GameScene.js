@@ -8,6 +8,7 @@ export class GameScene extends Scene {
   rows = 2;
   cols = 5;
   openedCard = null;
+  openedCardsCount = 0;
 
   constructor(name) {
     super(name);
@@ -26,6 +27,22 @@ export class GameScene extends Scene {
   create() {
     this.createBackground();
     this.createCards();
+    this.start();
+  }
+
+  start() {
+    this.openedCard = null;
+    this.openedCardsCount = 0;
+    this.initCards();
+  }
+
+  initCards() {
+    const positions = this.getCardPositions();
+    this.cards.forEach((card) => {
+      const { x, y } = positions.pop();
+      card.close();
+      card.setPosition(x, y);
+    });
   }
 
   createBackground() {
@@ -33,11 +50,9 @@ export class GameScene extends Scene {
   }
 
   createCards() {
-    const positions = Utils.Array.Shuffle(this.getCardPositions());
-
     this.cardIds.forEach((id) => {
-      this.cards.push(new Card(this, id, positions.pop()));
-      this.cards.push(new Card(this, id, positions.pop()));
+      this.cards.push(new Card(this, id));
+      this.cards.push(new Card(this, id));
     });
 
     this.input.on('gameobjectdown', this.onCardClicked, this);
@@ -58,13 +73,19 @@ export class GameScene extends Scene {
 
     const timeout = setTimeout(() => {
       if (this.openedCard.id === card.id) {
-        this.openedCard = null;
+        this.openedCardsCount += 2;
       } else {
         this.openedCard.close();
         card.close();
-        this.openedCard = null;
       }
+
+      this.openedCard = null;
+
       clearTimeout(timeout);
+
+      if (this.openedCardsCount === this.cards.length) {
+        this.start();
+      }
     }, 500);
   }
 
@@ -89,6 +110,6 @@ export class GameScene extends Scene {
       }
     }
 
-    return positions;
+    return Utils.Array.Shuffle(positions);
   }
 }

@@ -4,8 +4,8 @@ import { CARD } from './keys';
 export class Card extends GameObjects.Sprite {
   opened = false;
 
-  constructor(scene, id, { x, y }) {
-    super(scene, x, y, CARD);
+  constructor(scene, id) {
+    super(scene, 0, 0, CARD);
     this.scene = scene;
     this.id = id;
     this.setOrigin(0, 0);
