@@ -96,8 +96,11 @@ export class GameScene extends Scene {
       cardTexture.height + 4,
     ];
 
-    const offsetX = (this.sys.game.config.width - this.cols * cardWidth) / 2; // смещение, для позиционирования карт точно посередине
-    const offsetY = (this.sys.game.config.height - this.rows * cardHeight) / 2;
+    const offsetX =
+      (this.sys.game.config.width - this.cols * cardWidth) / 2 + cardWidth / 2; // смещение, для позиционирования карт точно посередине
+    const offsetY =
+      (this.sys.game.config.height - this.rows * cardHeight) / 2 +
+      cardHeight / 2;
 
     let positions = [];
 
