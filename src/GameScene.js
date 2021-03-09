@@ -9,6 +9,9 @@ export class GameScene extends Scene {
   cols = 5;
   openedCard = null;
   openedCardsCount = 0;
+  text = '';
+  activeCardsCount = 0;
+  timeout = 30;
 
   constructor(name) {
     super(name);
@@ -27,12 +30,16 @@ export class GameScene extends Scene {
   create() {
     this.createBackground();
     this.createCards();
+    this.createText();
+    this.createTimer();
     this.start();
   }
 
   start() {
+    this.timeout = 30;
     this.openedCard = null;
     this.openedCardsCount = 0;
+    this.activeCardsCount = 0;
     this.initCards();
   }
 
@@ -40,7 +47,9 @@ export class GameScene extends Scene {
     const positions = this.getCardPositions();
     this.cards.forEach((card) => {
       const { x, y } = positions.pop();
-      card.close();
+      if (card.opened) {
+        card.close();
+      }
       card.setPosition(x, y);
     });
   }
@@ -59,6 +68,10 @@ export class GameScene extends Scene {
   }
 
   onCardClicked(pointer, card) {
+    if (this.activeCardsCount >= 2) {
+      return;
+    }
+
     if (card.opened) {
       return;
     }
@@ -66,10 +79,12 @@ export class GameScene extends Scene {
     if (!this.openedCard) {
       card.open();
       this.openedCard = card;
+      this.activeCardsCount += 1;
       return;
     }
 
     card.open();
+    this.activeCardsCount += 1;
 
     const timeout = setTimeout(() => {
       if (this.openedCard.id === card.id) {
@@ -86,7 +101,9 @@ export class GameScene extends Scene {
       if (this.openedCardsCount === this.cards.length) {
         this.start();
       }
-    }, 500);
+
+      this.activeCardsCount = 0;
+    }, 900);
   }
 
   getCardPositions() {
@@ -114,5 +131,34 @@ export class GameScene extends Scene {
     }
 
     return Utils.Array.Shuffle(positions);
+  }
+
+  createText() {
+    this.text = this.add.text(10, 10, '', {
+      font: '36px sans-serif',
+      fill: '#000',
+      stroke: '#fff',
+      strokeThickness: 2,
+    });
+  }
+
+  onTimerTick() {
+    this.text.setText(`Time: ${this.timeout}`);
+
+    if (this.timeout === 0) {
+      this.start();
+      return;
+    }
+
+    this.timeout -= 1;
+  }
+
+  createTimer() {
+    this.time.addEvent({
+      delay: 1000,
+      callback: this.onTimerTick,
+      callbackScope: this,
+      loop: true,
+    });
   }
 }
