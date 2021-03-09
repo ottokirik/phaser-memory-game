@@ -1,6 +1,7 @@
 import { Scene, Utils } from 'phaser';
 import { Card } from './Card';
-import { CARD, BACKGROUND } from './keys';
+import { IMAGES, AUDIO } from './keys';
+import { IMAGES_PATH, SOUNDS_PATH } from './paths';
 
 export class GameScene extends Scene {
   cards = [];
@@ -12,17 +13,21 @@ export class GameScene extends Scene {
   text = '';
   activeCardsCount = 0;
   timeout = 30;
+  sounds = {};
 
   constructor(name) {
     super(name);
   }
 
-  // Загрузить картинки
+  // Загрузить ресурсы
   preload() {
-    this.load.image(BACKGROUND, 'images/background.png');
-    this.load.image(CARD, 'images/card.png');
+    this.load.image(IMAGES.BACKGROUND, `${IMAGES_PATH}background.png`);
+    this.load.image(IMAGES.CARD, `${IMAGES_PATH}card.png`);
     this.cardIds.forEach((id) => {
-      this.load.image(`${CARD}${id}`, `images/card${id}.png`);
+      this.load.image(`${IMAGES.CARD}${id}`, `${IMAGES_PATH}card${id}.png`);
+    });
+    Object.keys(AUDIO).forEach((key) => {
+      this.load.audio(AUDIO[key], `${SOUNDS_PATH}${AUDIO[key]}.mp3`);
     });
   }
 
@@ -30,6 +35,7 @@ export class GameScene extends Scene {
   create() {
     this.createBackground();
     this.createCards();
+    this.createSounds();
     this.createText();
     this.createTimer();
     this.start();
@@ -40,6 +46,7 @@ export class GameScene extends Scene {
     this.openedCard = null;
     this.openedCardsCount = 0;
     this.activeCardsCount = 0;
+    this.sounds.theme.play({ volume: 0.1 });
     this.initCards();
   }
 
@@ -77,17 +84,20 @@ export class GameScene extends Scene {
     }
 
     if (!this.openedCard) {
+      this.sounds.card.play();
       card.open();
       this.openedCard = card;
       this.activeCardsCount += 1;
       return;
     }
 
+    this.sounds.card.play();
     card.open();
     this.activeCardsCount += 1;
 
     const timeout = setTimeout(() => {
       if (this.openedCard.id === card.id) {
+        this.sounds.success.play();
         this.openedCardsCount += 2;
       } else {
         this.openedCard.close();
@@ -99,6 +109,7 @@ export class GameScene extends Scene {
       clearTimeout(timeout);
 
       if (this.openedCardsCount === this.cards.length) {
+        this.sounds.complete.play();
         this.start();
       }
 
@@ -107,7 +118,7 @@ export class GameScene extends Scene {
   }
 
   getCardPositions() {
-    const cardTexture = this.textures.get(CARD).getSourceImage(); // получение изображения карты
+    const cardTexture = this.textures.get(IMAGES.CARD).getSourceImage(); // получение изображения карты
     const [cardWidth, cardHeight] = [
       cardTexture.width + 4,
       cardTexture.height + 4,
@@ -145,7 +156,8 @@ export class GameScene extends Scene {
   onTimerTick() {
     this.text.setText(`Time: ${this.timeout}`);
 
-    if (this.timeout === 0) {
+    if (this.timeout <= 0) {
+      this.sounds.timeout.play();
       this.start();
       return;
     }
@@ -159,6 +171,12 @@ export class GameScene extends Scene {
       callback: this.onTimerTick,
       callbackScope: this,
       loop: true,
+    });
+  }
+
+  createSounds() {
+    Object.keys(AUDIO).forEach((key) => {
+      this.sounds[AUDIO[key]] = this.sound.add(AUDIO[key]);
     });
   }
 }

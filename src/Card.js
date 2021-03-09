@@ -1,11 +1,11 @@
 import { GameObjects } from 'phaser';
-import { CARD } from './keys';
+import { IMAGES } from './keys';
 
 export class Card extends GameObjects.Sprite {
   opened = false;
 
   constructor(scene, id) {
-    super(scene, 0, 0, CARD);
+    super(scene, 0, 0, IMAGES.CARD);
     this.scene = scene;
     this.id = id;
     this.scene.add.existing(this);
@@ -15,12 +15,12 @@ export class Card extends GameObjects.Sprite {
 
   open() {
     this.opened = true;
-    this.flip(`${CARD}${this.id}`);
+    this.flip(`${IMAGES.CARD}${this.id}`);
   }
 
   close() {
     this.opened = false;
-    this.flip(CARD);
+    this.flip(IMAGES.CARD);
   }
 
   flip(texture) {
