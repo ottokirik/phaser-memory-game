@@ -48,17 +48,18 @@ export class GameScene extends Scene {
     this.activeCardsCount = 0;
     this.sounds.theme.play({ volume: 0.1 });
     this.initCards();
+    this.showCards();
   }
 
   initCards() {
     const positions = this.getCardPositions();
-    this.cards.forEach((card) => {
-      const { x, y } = positions.pop();
-      if (card.opened) {
-        card.close();
-      }
-      card.setPosition(x, y);
+    this.cards.forEach((card, index) => {
+      card.init(positions.pop(), index);
     });
+  }
+
+  showCards() {
+    this.cards.forEach((card) => card.move());
   }
 
   createBackground() {
@@ -131,10 +132,13 @@ export class GameScene extends Scene {
       cardHeight / 2;
 
     let positions = [];
+    let positionDelay = 0;
 
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.cols; col++) {
+        positionDelay += 1;
         positions.push({
+          delay: positionDelay * 100,
           x: offsetX + col * cardWidth,
           y: offsetY + row * cardHeight,
         });

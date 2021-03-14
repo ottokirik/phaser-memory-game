@@ -13,6 +13,14 @@ export class Card extends GameObjects.Sprite {
     this.setInteractive();
   }
 
+  init(position, index) {
+    this.position = position;
+    if (this.opened) {
+      this.close();
+    }
+    this.setPosition(-this.width, -this.height);
+  }
+
   open() {
     this.opened = true;
     this.flip(`${IMAGES.CARD}${this.id}`);
@@ -40,6 +48,17 @@ export class Card extends GameObjects.Sprite {
     this.scene.tweens.add({
       targets: this,
       scaleX: 1,
+      ease: 'Linear',
+      duration: 250,
+    });
+  }
+
+  move() {
+    this.scene.tweens.add({
+      targets: this,
+      x: this.position.x,
+      y: this.position.y,
+      delay: this.position.delay,
       ease: 'Linear',
       duration: 250,
     });
