@@ -53,14 +53,17 @@ export class Card extends GameObjects.Sprite {
     });
   }
 
-  move() {
+  move({ x, y }, complete = () => {}) {
     this.scene.tweens.add({
       targets: this,
-      x: this.position.x,
-      y: this.position.y,
+      x,
+      y,
       delay: this.position.delay,
-      ease: 'Linear',
+      ease: 'Bounce',
       duration: 250,
+      onComplete: () => {
+        complete();
+      },
     });
   }
 }

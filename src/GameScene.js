@@ -12,7 +12,6 @@ export class GameScene extends Scene {
   openedCardsCount = 0;
   text = '';
   activeCardsCount = 0;
-  timeout = 30;
   sounds = {};
 
   constructor(name) {
@@ -43,6 +42,7 @@ export class GameScene extends Scene {
 
   start() {
     this.timeout = 30;
+    this.timer.paused = false;
     this.openedCard = null;
     this.openedCardsCount = 0;
     this.activeCardsCount = 0;
@@ -59,7 +59,33 @@ export class GameScene extends Scene {
   }
 
   showCards() {
-    this.cards.forEach((card) => card.move());
+    this.cards.forEach((card) => {
+      card.depth = card.position.delay;
+      card.move(card.position);
+    });
+  }
+
+  hideCards() {
+    // Количество "улетевших карт"
+    let cardsMoveCompleteCount = 0;
+
+    const onCardMoveComplete = () => {
+      cardsMoveCompleteCount += 1;
+      if (cardsMoveCompleteCount >= this.cards.length) {
+        // Если все карты "улетели", перезапускаем игру
+        this.start();
+      }
+    };
+
+    this.cards.forEach((card) => {
+      card.move(
+        {
+          x: this.sys.game.config.width + card.width,
+          y: this.sys.game.config.height + card.height,
+        },
+        onCardMoveComplete
+      );
+    });
   }
 
   createBackground() {
@@ -111,7 +137,7 @@ export class GameScene extends Scene {
 
       if (this.openedCardsCount === this.cards.length) {
         this.sounds.complete.play();
-        this.start();
+        this.hideCards();
       }
 
       this.activeCardsCount = 0;
@@ -161,8 +187,10 @@ export class GameScene extends Scene {
     this.text.setText(`Time: ${this.timeout}`);
 
     if (this.timeout <= 0) {
+      // Остановить таймер на время анимации карт
+      this.timer.paused = true;
       this.sounds.timeout.play();
-      this.start();
+      this.hideCards();
       return;
     }
 
@@ -170,7 +198,7 @@ export class GameScene extends Scene {
   }
 
   createTimer() {
-    this.time.addEvent({
+    this.timer = this.time.addEvent({
       delay: 1000,
       callback: this.onTimerTick,
       callbackScope: this,
